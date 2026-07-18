@@ -1,0 +1,8 @@
+# Don't accidentally commit private keys
+*.rsa
+
+# Melange build output
+/packages/
+
+# Melange cache
+/.cache/

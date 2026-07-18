@@ -1,0 +1,49 @@
+name: "Release melange package"
+description: "Create a GitHub release for "
+
+inputs:
+  repo-dir:
+    description: "Path to the package repo output by the melange build"
+    required: true
+    default: "./packages/"
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Get package info
+      id: pkg-info
+      uses: ./.github/actions/get-melange-package-info
+
+    - name: Create release
+      shell: bash
+      env:
+        REPO_DIR: ${{ inputs.repo-dir }}
+        PKG_FULLNAME: ${{ steps.pkg-info.outputs.package-fullname }}
+        PKG_FULLVERSION: ${{ steps.pkg-info.outputs.package-fullversion }}
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        set -e
+
+        REPO_DIR=$(realpath "${REPO_DIR}")
+
+        DIST_DIR=$(mktemp -d --tmpdir="${RUNNER_TEMP}")
+        mkdir -p ${DIST_DIR}
+
+        echo "Creating release for repo at ${REPO_DIR}"
+
+        cp "${REPO_DIR}/melange.yaml" "${DIST_DIR}/"
+        cp "${REPO_DIR}/signing.rsa.pub" "${DIST_DIR}/"
+
+        for ARCH_DIR in "${REPO_DIR}"/*; do
+          if [ ! -d "${ARCH_DIR}" ]; then
+            continue
+          fi
+
+          ARCH=$(basename "${ARCH_DIR}")
+
+          echo "Found arch '$ARCH'..."
+          cp "${ARCH_DIR}/${PKG_FULLNAME}.apk" "${DIST_DIR}/${PKG_FULLNAME}-${ARCH}.apk"
+        done
+
+        gh release create --generate-notes "${PKG_FULLVERSION}" "${DIST_DIR}/*"

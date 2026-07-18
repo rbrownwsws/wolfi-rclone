@@ -1,0 +1,32 @@
+package:
+  name: rclone
+  version: "1.74.4"
+  epoch: 0
+  description: Rclone syncs your files to cloud storage
+  copyright:
+    - license: MIT
+  dependencies:
+    runtime:
+
+pipeline:
+  - uses: git-checkout
+    with:
+      expected-commit: 5bc93a2a7ab0ebd0a11352bc4968eabeffb18027
+      repository: https://github.com/rclone/rclone
+      tag: v${{package.version}}
+
+  - uses: go/build
+    with:
+      go-package: go-1.26
+      ldflags: -X github.com/rclone/rclone/fs.Version=${{package.version}}
+      packages: .
+      output: rclone
+
+environment:
+  contents:
+    repositories:
+      - https://packages.wolfi.dev/os
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    packages:
+      - go-1.26

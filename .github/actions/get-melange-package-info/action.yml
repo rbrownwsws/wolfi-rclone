@@ -1,0 +1,45 @@
+name: "Get melange package info"
+description: "Get information about a melange package"
+
+inputs:
+  melange-config-file:
+    description: "Path to melange config file"
+    required: true
+    default: "melange.yaml"
+
+outputs:
+  package-name:
+    description: "Package name"
+    value: ${{ steps.pkg-info.outputs.package-name }}
+  package-version:
+    description: "Package version"
+    value: ${{ steps.pkg-info.outputs.package-version }}
+  package-epoch:
+    description: "Package epoch"
+    value: ${{ steps.pkg-info.outputs.package-epoch }}
+  package-fullname:
+    description: "Package fullname"
+    value: ${{ steps.pkg-info.outputs.package-fullname }}
+  package-fullversion:
+    description: "Package fullversion"
+    value: ${{ steps.pkg-info.outputs.package-fullversion }}
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Get melange package info
+      id: pkg-info
+      shell: bash
+      run: |
+        set -e
+
+        PACKAGE_NAME=$(yq ".package.name" ${{ inputs.melange-config-file }})
+        PACKAGE_VERSION=$(yq ".package.version" ${{ inputs.melange-config-file }})
+        PACKAGE_EPOCH=$(yq ".package.epoch" ${{ inputs.melange-config-file }})
+
+        echo "package-name=${PACKAGE_NAME}" >> "${GITHUB_OUTPUT}"
+        echo "package-version=${PACKAGE_VERSION}" >> "${GITHUB_OUTPUT}"
+        echo "package-epoch=${PACKAGE_EPOCH}" >> "${GITHUB_OUTPUT}"
+        echo "package-fullname=${PACKAGE_NAME}-${PACKAGE_VERSION}-r${PACKAGE_EPOCH}" >> "${GITHUB_OUTPUT}"
+        echo "package-fullversion=${PACKAGE_VERSION}-r${PACKAGE_EPOCH}" >> "${GITHUB_OUTPUT}"
