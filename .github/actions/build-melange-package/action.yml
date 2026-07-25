@@ -32,7 +32,7 @@ runs:
   steps:
     - name: Get package info
       id: pkg-info
-      uses: ./.github/actions/get-melange-package-info
+      uses: rbrownwsws/get-melange-package-info@3bbdcad7aafc515f2aef9e26340dbeafd0fbf84b
 
     - name: Cache - Restore build deps
       uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
