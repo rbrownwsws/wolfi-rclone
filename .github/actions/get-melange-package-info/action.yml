@@ -6,6 +6,9 @@ inputs:
     description: "Path to melange config file"
     required: true
     default: "melange.yaml"
+  package-distro:
+    description: "The distro that this package is for (will try to autodetect if unset)"
+    required: false
 
 outputs:
   package-name:
@@ -23,6 +26,9 @@ outputs:
   package-fullversion:
     description: "Package fullversion"
     value: ${{ steps.pkg-info.outputs.package-fullversion }}
+  package-distro:
+    description: "Package distro"
+    value: ${{ steps.pkg-info.outputs.package-distro }}
 
 runs:
   using: "composite"
@@ -31,15 +37,12 @@ runs:
     - name: Get melange package info
       id: pkg-info
       shell: bash
+      env:
+        MELANGE_CONFIG_FILE: ${{ inputs.melange-config-file }}
+        PACKAGE_DISTRO: ${{ inputs.package-distro }}
       run: |
-        set -e
+        set -euo pipefail
 
-        PACKAGE_NAME=$(yq ".package.name" ${{ inputs.melange-config-file }})
-        PACKAGE_VERSION=$(yq ".package.version" ${{ inputs.melange-config-file }})
-        PACKAGE_EPOCH=$(yq ".package.epoch" ${{ inputs.melange-config-file }})
+        chmod +x "${GITHUB_ACTION_PATH}/get-package-info.sh"
 
-        echo "package-name=${PACKAGE_NAME}" >> "${GITHUB_OUTPUT}"
-        echo "package-version=${PACKAGE_VERSION}" >> "${GITHUB_OUTPUT}"
-        echo "package-epoch=${PACKAGE_EPOCH}" >> "${GITHUB_OUTPUT}"
-        echo "package-fullname=${PACKAGE_NAME}-${PACKAGE_VERSION}-r${PACKAGE_EPOCH}" >> "${GITHUB_OUTPUT}"
-        echo "package-fullversion=${PACKAGE_VERSION}-r${PACKAGE_EPOCH}" >> "${GITHUB_OUTPUT}"
+        "${GITHUB_ACTION_PATH}/get-package-info.sh"

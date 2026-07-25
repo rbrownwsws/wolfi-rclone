@@ -14,6 +14,8 @@ runs:
     - name: Get package info
       id: pkg-info
       uses: ./.github/actions/get-melange-package-info
+      with:
+        melange-config-file: "${{ inputs.repo-dir }}/melange.yaml"
 
     - name: Create release
       shell: bash
@@ -21,6 +23,7 @@ runs:
         REPO_DIR: ${{ inputs.repo-dir }}
         PKG_FULLNAME: ${{ steps.pkg-info.outputs.package-fullname }}
         PKG_FULLVERSION: ${{ steps.pkg-info.outputs.package-fullversion }}
+        PKG_DISTRO: ${{ steps.pkg-info.outputs.package-distro }}
         GH_TOKEN: ${{ github.token }}
       run: |
         set -e
@@ -43,7 +46,7 @@ runs:
           ARCH=$(basename "${ARCH_DIR}")
 
           echo "Found arch '$ARCH'..."
-          cp "${ARCH_DIR}/${PKG_FULLNAME}.apk" "${DIST_DIR}/${PKG_FULLNAME}-${ARCH}.apk"
+          cp "${ARCH_DIR}/${PKG_FULLNAME}.apk" "${DIST_DIR}/${PKG_FULLNAME}-${PKG_DISTRO}-${ARCH}.apk"
         done
 
         gh release create --generate-notes "${PKG_FULLVERSION}" "${DIST_DIR}/*"
