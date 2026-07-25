@@ -44,5 +44,4 @@ runs:
         set -euo pipefail
 
         chmod +x "${GITHUB_ACTION_PATH}/get-package-info.sh"
-
         "${GITHUB_ACTION_PATH}/get-package-info.sh"

@@ -1,0 +1,126 @@
+# Copyright 2022 Chainguard, Inc.
+# SPDX-License-Identifier: Apache-2.0
+
+name: 'Setup melange'
+description: |
+  Sets up melange, so it can run in an Ubuntu environment.
+
+inputs:
+  version:
+    description: 'Version of melange to install (tip, latest-release, v0.5.5, etc.)'
+    required: true
+    default: 'latest-release'
+
+runs:
+  using: 'composite'
+
+  steps:
+    - name: 'Install dependencies'
+      shell: bash
+      run: |
+        sudo apt update
+        sudo apt install -y qemu-user-static bubblewrap
+
+    # - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+    #   with:
+    #     go-version: '1.26'
+    #     check-latest: true
+    #     cache: false
+
+    # - name: Enable bubblewrap in ubuntu
+    #   shell: bash
+    #   run: |
+    #     set -x
+    #     # https://github.com/chainguard-dev/melange/issues/1508
+    #     sudo tee /etc/apparmor.d/local-bwrap <<"EOF"
+    #     abi <abi/4.0>,
+    #     include <tunables/global>
+
+    #     profile local-bwrap /usr/bin/bwrap flags=(unconfined) {
+    #       userns,
+    #       # Site-specific additions and overrides. See local/README for details.
+    #       include if exists <local/bwrap>
+    #     }
+    #     EOF
+
+    #     sudo systemctl reload apparmor
+    #     if ! bwrap --unshare-user --bind / / true ; then
+    #       echo "FATAL: failed to verify 'bwrap --unshare-user'"
+    #       which bwrap || :
+    #       ls /proc/self/ns || echo "no /proc/self/ns"
+    #       kver=$(uname -r) || echo "uname -r failed"
+    #       if config="/boot/config-$kver" && [ -f "$config" ]; then
+    #         grep CONFIG_USER_NS "$config" || echo "no CONFIG_USER_NS in $config"
+    #       fi
+    #       exit 1
+    #     fi
+    #     echo "bubblewrap (bwrap) installed successfully."
+
+    - name: 'Install melange'
+      if:
+      env:
+        INPUTS_VERSION: ${{ inputs.version }}
+      shell: bash
+      run: |
+        set -ex
+
+        # Install melange:
+        # - if version is "tip", install from tip of main.
+        # - if version is "latest-release", look up latest release.
+        # - otherwise, install the specified version.
+        case "${INPUTS_VERSION}" in
+        tip)
+          TMP_CLONE_DIR="$(mktemp -d)"
+          git clone https://github.com/chainguard-dev/melange "${TMP_CLONE_DIR}"
+          pushd "${TMP_CLONE_DIR}"
+          make melange
+          sudo env "PATH=$PATH" make install
+          popd
+          rm -rf "${TMP_CLONE_DIR}"
+          ;;
+        latest-release)
+          # fetch the latest 20 releases, we need to filter by the ones that have assets.
+          tmpf=$(mktemp)
+          url="https://api.github.com/repos/chainguard-dev/melange/releases/latest"
+          curl --fail -s -u "username:${GITHUB_TOKEN}" "$url" > "$tmpf" ||
+            { echo "error in github api call for latest melange release"; exit 1; }
+          tag=$(jq -r .tag_name < "$tmpf") ||
+            { echo "error parsing json from $url"; exit 1; }
+
+          if [ -z "$tag" ]; then
+            # this should, ideally, never happen.
+            echo "No melange release with assets found"
+            exit 1
+          fi
+          rm -f "$tmpf"
+          echo "Found 'latest-release' for melange is '$tag'"
+          ;;
+        *)
+          tag="${INPUTS_VERSION}"
+          ;;
+        esac
+
+        if [[ ! -z ${tag} ]]; then
+          case "$(echo "$RUNNER_ARCH" | awk '{print tolower($0)}')" in
+          x86|x64) ARCH=amd64;;
+          arm64)   ARCH=arm64;;
+          *)
+            echo "Unsupported RUNNER_ARCH \"${RUNNER_ARCH}\""
+            exit 1
+            ;;
+          esac
+          case "$(echo "$RUNNER_OS" | awk '{print tolower($0)}')" in
+          "linux") OS=linux;;
+          "macos") OS=osx;;
+          *)
+            echo "Unsupported RUNNER_OS \"${RUNNER_OS}\""
+            exit 1
+            ;;
+          esac
+
+          without_v=${tag#"v"}
+          echo "Installing melange @ ${tag}"
+          curl -fsL "https://github.com/chainguard-dev/melange/releases/download/${tag}/melange_${without_v}_${OS}_${ARCH}.tar.gz" | sudo tar xzf - --strip-components=1 -C /usr/local/bin
+        fi
+
+        melange version

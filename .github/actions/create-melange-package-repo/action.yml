@@ -1,0 +1,35 @@
+name: "Create a package repo for a single melange package"
+description: "Create a package repo for a single melange package"
+
+inputs:
+  repo-dir:
+    description: "Path to where the package repo should be created"
+    required: true
+  signing-key:
+    description: "The private key used to sign the package index (PEM format)"
+    required: true
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Collect package versions
+      shell: bash
+      env:
+        REPO_DIR: ${{ inputs.repo-dir }}
+      run: |
+        set -euo pipefail
+
+        chmod +x "${GITHUB_ACTION_PATH}/collect-package-versions.sh"
+        "${GITHUB_ACTION_PATH}/collect-package-versions.sh"
+
+    - name: Build package index
+      shell: bash
+      env:
+        REPO_DIR: ${{ inputs.repo-dir }}
+        SIGNING_KEY: ${{ inputs.signing-key }}
+      run: |
+        set -euo pipefail
+
+        chmod +x "${GITHUB_ACTION_PATH}/index-packages.sh"
+        "${GITHUB_ACTION_PATH}/index-packages.sh"

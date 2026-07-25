@@ -68,7 +68,6 @@ runs:
         trap 'rm -f "${SIGNING_KEY_FILE}"' EXIT
 
         # Put the private signing key into a file
-        touch "${SIGNING_KEY_FILE}"
         chmod 600 "${SIGNING_KEY_FILE}"
         echo -n "${SIGNING_KEY}" > "${SIGNING_KEY_FILE}"
 
