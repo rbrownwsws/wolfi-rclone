@@ -11,11 +11,8 @@ jobs:
       - name: Setup melange
         uses: chainguard-dev/actions/setup-melange@fabe4ed3f66ceb5f8ec86ed7ae6d0c945ca362fb # v1.6.28
 
-      - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-
       - name: Create package repo
-        uses: ./.github/actions/create-melange-package-repo
+        uses: rbrownwsws/create-melange-package-repo@4b71dfc9d2393df0df6283d6be5a979b6131fa25
         with:
           repo-dir: "./packages/"
           signing-key: ${{ secrets.APK_SIGNING_KEY }}
