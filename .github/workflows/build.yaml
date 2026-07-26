@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Build package
-        uses: rbrownwsws/build-melange-package@d2e347fb782cc0a5a76fa8f15e374b157c324dd6
+        uses: rbrownwsws/build-melange-package@68b9bea1968bb1b264fb43fd07f33af3d26e36c2
         with:
           signing-key: ${{ secrets.signing-key }}
           signing-key-name: ${{ inputs.signing-key-name }}
