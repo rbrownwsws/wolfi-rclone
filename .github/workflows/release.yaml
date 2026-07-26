@@ -6,7 +6,8 @@ on:
 jobs:
   build:
     uses: ./.github/workflows/build.yaml
-    secrets: inherit
+    secrets:
+      signing-key: ${{ secrets.APK_SIGNING_KEY }}
 
   release:
     needs:

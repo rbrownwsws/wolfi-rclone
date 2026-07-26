@@ -2,6 +2,10 @@ name: Build
 
 on:
   workflow_call:
+    secrets:
+      signing-key:
+        description: "The private key used to sign the built packages (PEM format)"
+        required: false
 
 jobs:
   build:
@@ -15,9 +19,9 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Build package
-        uses: rbrownwsws/build-melange-package@1d58f9f4bc4a946c9311c77acd61c30441c4fbdd
+        uses: rbrownwsws/build-melange-package@96f42fb1e694c1af8d0deedade62d1658042ea0e
         with:
-          signing-key: ${{ secrets.APK_SIGNING_KEY }}
+          signing-key: ${{ secrets.signing-key }}
 
       - name: Upload built packages
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.2
