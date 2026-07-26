@@ -1,3 +1,6 @@
+# IDE junk
+/.idea/
+
 # Don't accidentally commit private keys
 *.rsa
 
