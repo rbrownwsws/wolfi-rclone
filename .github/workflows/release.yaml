@@ -28,4 +28,4 @@ jobs:
           path: ./packages/
 
       - name: Release package
-        uses: rbrownwsws/release-melange-package@bb1f6c3fe7f353026a5d04ab54290da3e255c475
+        uses: rbrownwsws/release-melange-package@df702ea5c82fe4851c709fbfd1d4c9a9e610f025
