@@ -1,0 +1,27 @@
+name: Build
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Setup melange
+        uses: chainguard-dev/actions/setup-melange@fabe4ed3f66ceb5f8ec86ed7ae6d0c945ca362fb # v1.6.28
+
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Build package
+        uses: rbrownwsws/build-melange-package@1d58f9f4bc4a946c9311c77acd61c30441c4fbdd
+        with:
+          signing-key: ${{ secrets.APK_SIGNING_KEY }}
+
+      - name: Upload built packages
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.2
+        with:
+          name: packages
+          path: ./packages/
+          retention-days: 1

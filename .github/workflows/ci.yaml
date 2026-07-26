@@ -2,45 +2,11 @@ name: CI
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - master
+  pull_request:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
-
-    steps:
-      - name: Setup melange
-        uses: chainguard-dev/actions/setup-melange@fabe4ed3f66ceb5f8ec86ed7ae6d0c945ca362fb # v1.6.28
-
-      - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-
-      - name: Build package
-        uses: rbrownwsws/build-melange-package@1d58f9f4bc4a946c9311c77acd61c30441c4fbdd
-        with:
-          signing-key: ${{ secrets.APK_SIGNING_KEY }}
-
-      - name: Upload built packages
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.2
-        with:
-          name: packages
-          path: ./packages/
-          retention-days: 1
-
-  release:
-    needs:
-      - build
-
-    runs-on: ubuntu-24.04
-
-    permissions:
-      contents: write
-
-    steps:
-      - name: Download packages
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: packages
-          path: ./packages/
-
-      - name: Release package
-        uses: rbrownwsws/release-melange-package@8d62e12671c645ce5f4593456e3ab1aed9617767
+    uses: ./.github/workflows/build.yaml
