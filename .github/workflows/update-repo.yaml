@@ -15,10 +15,11 @@ jobs:
         uses: chainguard-dev/actions/setup-melange@fabe4ed3f66ceb5f8ec86ed7ae6d0c945ca362fb # v1.6.28
 
       - name: Create package repo
-        uses: rbrownwsws/create-melange-package-repo@4b71dfc9d2393df0df6283d6be5a979b6131fa25
+        uses: rbrownwsws/create-melange-package-repo@589957f140564d80521515e25133b294c237f004
         with:
           repo-dir: "./packages/"
           signing-key: ${{ secrets.APK_SIGNING_KEY }}
+          signing-key-name: "rbrownwsws.github.io-wolfi-rclone"
 
       - name: Upload repo as artifact
         id: deployment

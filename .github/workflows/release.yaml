@@ -6,6 +6,8 @@ on:
 jobs:
   build:
     uses: ./.github/workflows/build.yaml
+    with:
+      signing-key-name: "rbrownwsws.github.io-wolfi-rclone"
     secrets:
       signing-key: ${{ secrets.APK_SIGNING_KEY }}
 

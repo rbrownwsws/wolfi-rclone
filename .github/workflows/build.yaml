@@ -2,6 +2,12 @@ name: Build
 
 on:
   workflow_call:
+    inputs:
+      signing-key-name:
+        description: "The name of the key used to sign the built packages (not including the .rsa/.rsa.pub suffix)"
+        required: false
+        type: string
+        default: ""
     secrets:
       signing-key:
         description: "The private key used to sign the built packages (PEM format)"
@@ -19,9 +25,10 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Build package
-        uses: rbrownwsws/build-melange-package@96f42fb1e694c1af8d0deedade62d1658042ea0e
+        uses: rbrownwsws/build-melange-package@d2e347fb782cc0a5a76fa8f15e374b157c324dd6
         with:
           signing-key: ${{ secrets.signing-key }}
+          signing-key-name: ${{ inputs.signing-key-name }}
 
       - name: Upload built packages
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.2
