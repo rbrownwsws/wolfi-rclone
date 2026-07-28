@@ -19,7 +19,7 @@ jobs:
         with:
           repo-dir: "./packages/"
           signing-key: ${{ secrets.APK_SIGNING_KEY }}
-          signing-key-name: "rbrownwsws.github.io-wolfi-rclone"
+          signing-key-name: ${{ vars.APK_SIGNING_KEY_NAME }}
 
       - name: Upload repo as artifact
         id: deployment
