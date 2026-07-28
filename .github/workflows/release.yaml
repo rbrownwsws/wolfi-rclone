@@ -21,6 +21,14 @@ jobs:
       contents: write
 
     steps:
+      - name: Create GitHub App Token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        id: app-token
+        with:
+          client-id: ${{ vars.RELEASER_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASER_APP_PRIVATE_KEY }}
+          permission-contents: write
+
       - name: Download packages
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
@@ -28,4 +36,6 @@ jobs:
           path: ./packages/
 
       - name: Release package
-        uses: rbrownwsws/release-melange-package@df702ea5c82fe4851c709fbfd1d4c9a9e610f025
+        uses: rbrownwsws/release-melange-package@37385f81d37f1c8c7e552e5e2443609dedf21779
+        with:
+          github-api-token: ${{ steps.app-token.outputs.token }}
