@@ -21,6 +21,8 @@ jobs:
       contents: write
 
     outputs:
+      package-files: ${{ steps.release.outputs.package-files }}
+      attestation-files: ${{ steps.release.outputs.attestation-files}}
       release-id: ${{ steps.release.outputs.release-id }}
 
     steps:
@@ -95,7 +97,7 @@ jobs:
 
     strategy:
       matrix:
-        file: ${{ fromJSON(needs.release.outputs.attest-files) }}
+        file: ${{ fromJSON(needs.release.outputs.attestation-files) }}
 
     steps:
       - name: Download attest files
