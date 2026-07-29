@@ -107,7 +107,7 @@ jobs:
           path: ${{ github.workspace }}/attest/
 
       - name: Attest melange build provenance
-        uses: rbrownwsws/attest-melange-provenance@577f1140d6224a94c0acf8d0b4b6e91c1f963e6c
+        uses: rbrownwsws/attest-melange-provenance@5ef534b25953efb3ebec39c5b7399a8b00cad614
         with:
           attestation-file: "${{ github.workspace }}/attest/${{ matrix.file }}"
 
