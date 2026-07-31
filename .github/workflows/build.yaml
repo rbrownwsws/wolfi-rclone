@@ -8,14 +8,74 @@ on:
         required: false
         type: string
         default: ""
+      build-arch:
+        description: "The architecture(s) you want to build for (comma-separated)"
+        required: false
+        type: string
+        default: "x86_64"
     secrets:
       signing-key:
         description: "The private key used to sign the built packages (PEM format)"
         required: false
 
+    outputs:
+      arches:
+        description: "The architectures that were built (JSON array)"
+        value: ${{ jobs.prepare.outputs.arches }}
+
 jobs:
-  build:
+  prepare:
     runs-on: ubuntu-24.04
+
+    outputs:
+      arches: ${{ steps.prepare.outputs.arches }}
+      builds: ${{ steps.prepare.outputs.builds }}
+
+    steps:
+      - id: prepare
+        shell: bash
+        env:
+          BUILD_ARCH: ${{ inputs.build-arch }}
+        run: |
+          set -euo pipefail
+
+          # Clean up input
+          # - Split on commas
+          # - Remove leading & trailing whitespace
+          # - Make lowercase
+          # - Normalize arch names (apk style)
+          arches_json=$(jq -c -n --arg arches "${BUILD_ARCH}" '
+            $arches |
+            split(",") |
+            map(
+              gsub("^\\s+|\\s+$"; "") |
+              ascii_downcase |
+              {
+                "386": "x86",
+                "amd64": "x86_64",
+                "arm64": "aarch64",
+                "arm": "armhf",
+                "arm/v6": "armhf",
+                "arm/v7": "armv7",
+                "loong64": "loongarch64"
+              }[.] // .
+            )
+          ')
+
+          builds_json=$(jq -c '[.[] | {arch: ., runner: (if . == "aarch64" then "ubuntu-24.04-arm" else "ubuntu-24.04" end)}]' <<< "${arches_json}")
+
+          echo "arches=${arches_json}" >> "${GITHUB_OUTPUT}"
+          echo "builds=${builds_json}" >> "${GITHUB_OUTPUT}"
+
+  build:
+    needs:
+      - prepare
+
+    strategy:
+      matrix:
+        builds: ${{ fromJSON(needs.prepare.outputs.builds) }}
+
+    runs-on: ${{ matrix.builds.runner }}
 
     steps:
       - name: Setup melange
@@ -27,12 +87,13 @@ jobs:
       - name: Build package
         uses: rbrownwsws/build-melange-package@dd8d27d563e275350ad382f1f90eaa9e948f5d02
         with:
+          build-arch: ${{ matrix.builds.arch }}
           signing-key: ${{ secrets.signing-key }}
           signing-key-name: ${{ inputs.signing-key-name }}
 
       - name: Upload build output
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.2
         with:
-          name: build
+          name: build-${{ matrix.builds.arch }}
           path: ./packages/
           retention-days: 1

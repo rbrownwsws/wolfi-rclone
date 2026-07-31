@@ -7,6 +7,7 @@ jobs:
   build:
     uses: ./.github/workflows/build.yaml
     with:
+      build-arch: "amd64,arm64"
       signing-key-name: ${{ vars.APK_SIGNING_KEY_NAME }}
     secrets:
       signing-key: ${{ secrets.APK_SIGNING_KEY }}
@@ -37,7 +38,8 @@ jobs:
       - name: Download build output
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: build
+          pattern: build-*
+          merge-multiple: true
           path: ./packages/
 
       - name: Create Release
