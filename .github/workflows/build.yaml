@@ -125,7 +125,7 @@ jobs:
           USE_SIGNING="false"
           if [[ -n "${SIGNING_KEY:-}" ]]; then
             USE_SIGNING="true"
-            echo "::info::This build will be signed
+            echo "::info::This build will be signed"
 
             TEMP_DIR=$(mktemp -d --tmpdir="${RUNNER_TEMP}")
             PUB_KEY_FILE="${TEMP_DIR}/${SIGNING_KEY_NAME}.rsa.pub"
@@ -134,7 +134,7 @@ jobs:
 
             echo "public-key-file=${PUB_KEY_FILE}" >> "${GITHUB_OUTPUT}"
           else
-            echo "::info::This build will not be signed
+            echo "::info::This build will not be signed"
           fi
 
           echo "use-signing=${USE_SIGNING}" >> "${GITHUB_OUTPUT}"
