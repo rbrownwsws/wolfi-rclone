@@ -12,7 +12,7 @@ jobs:
     secrets:
       signing-key: ${{ secrets.APK_SIGNING_KEY }}
 
-  release:
+  create-release:
     needs:
       - build
 
@@ -22,9 +22,8 @@ jobs:
       contents: write
 
     outputs:
-      package-files: ${{ steps.release.outputs.package-files }}
-      attestation-files: ${{ steps.release.outputs.attestation-files}}
-      release-id: ${{ steps.release.outputs.release-id }}
+      release-id: ${{ steps.create-release.outputs.release-id }}
+      upload-url: ${{ steps.create-release.outputs.upload-url }}
 
     steps:
       - name: Create GitHub App Token
@@ -35,89 +34,91 @@ jobs:
           private-key: ${{ secrets.RELEASER_APP_PRIVATE_KEY }}
           permission-contents: write
 
-      - name: Download build output
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          pattern: build-*
-          merge-multiple: true
-          path: ./packages/
-
       - name: Create Release
-        id: release
-        uses: rbrownwsws/release-melange-package@d437f609b161167c52c54179dd5dad309318eae3
+        id: create-release
+        uses: rbrownwsws/create-release@86c684b3707a42915a13b54bec1e326d3b1a6f2f # master
         with:
-          draft: "true"
+          tag-name: ${{ needs.build.outputs.package-fullversion }}
           github-api-token: ${{ steps.app-token.outputs.token }}
 
-      - name: Upload dist files
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.2
-        with:
-          name: dist
-          path: ${{ steps.release.outputs.dist-dir }}
-          retention-days: 1
-
-      - name: Upload attestation files
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.2
-        with:
-          name: attest
-          path: ${{ steps.release.outputs.attest-dir }}
-          retention-days: 1
-
-  attest-provenance-github:
-    needs:
-      - release
-
-    runs-on: ubuntu-24.04
-
-    permissions:
-      id-token: write
-      attestations: write
-      artifact-metadata: write
-
-    steps:
-      - name: Download dist files
+      - name: Download signing public keys
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          name: dist
-          path: ${{ github.workspace }}/dist/
+          name: build-public-key
+          path: ${{ github.workspace }}/keys/
 
-      - name: Attest GitHub build provenance
-        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4.2.0
+      - name: Add signing public key to release
+        uses: rbrownwsws/upload-release-asset@cbea2a60c78a3b334c54d47045691251821c170e # master
         with:
-          subject-path: '${{ github.workspace }}/dist/*.apk'
+          asset-name: "${{ vars.APK_SIGNING_KEY_NAME }}.rsa.pub"
+          file-path: ${{ github.workspace }}/keys/${{ vars.APK_SIGNING_KEY_NAME }}.rsa.pub
+          upload-url: ${{ steps.create-release.outputs.upload-url }}
 
-  attest-provenance-melange:
-    needs:
-      - release
-
-    runs-on: ubuntu-24.04
-
-    permissions:
-      id-token: write
-      attestations: write
-      artifact-metadata: write
-
-    strategy:
-      matrix:
-        file: ${{ fromJSON(needs.release.outputs.attestation-files) }}
-
-    steps:
-      - name: Download attest files
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: attest
-          path: ${{ github.workspace }}/attest/
-
-      - name: Attest melange build provenance
-        uses: rbrownwsws/attest-melange-provenance@5ef534b25953efb3ebec39c5b7399a8b00cad614
-        with:
-          attestation-file: "${{ github.workspace }}/attest/${{ matrix.file }}"
+#  attest-provenance-github:
+#    needs:
+#      - create-release
+#
+#    runs-on: ubuntu-24.04
+#
+#    permissions:
+#      id-token: write
+#      attestations: write
+#      artifact-metadata: write
+#
+#    steps:
+#      # TODO: Download *build-<arch>* files
+#      - name: Download dist files
+#        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+#        with:
+#          name: dist
+#          path: ${{ github.workspace }}/dist/
+#
+#      # TODO: Rename apk file
+#
+#      # TODO: Upload renamed apk file to Release
+#
+#      # TODO: Attest provenance of a single apk (and save output)
+#      - name: Attest GitHub build provenance
+#        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4.2.0
+#        with:
+#          subject-path: '${{ github.workspace }}/dist/*.apk'
+#
+#      # TODO: Upload .sigstore.json to Release
+#
+#
+#
+#  attest-provenance-melange:
+#    needs:
+#      - create-release
+#
+#    runs-on: ubuntu-24.04
+#
+#    permissions:
+#      id-token: write
+#      attestations: write
+#      artifact-metadata: write
+#
+#    strategy:
+#      matrix:
+#        file: ${{ fromJSON(needs.release.outputs.attestation-files) }}
+#
+#    steps:
+#      - name: Download attest files
+#        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+#        with:
+#          name: attest
+#          path: ${{ github.workspace }}/attest/
+#
+#      - name: Attest melange build provenance
+#        uses: rbrownwsws/attest-melange-provenance@5ef534b25953efb3ebec39c5b7399a8b00cad614 # master
+#        with:
+#          attestation-file: "${{ github.workspace }}/attest/${{ matrix.file }}"
 
   publish-release:
     needs:
-      - release
-      - attest-provenance-github
-      - attest-provenance-melange
+      - create-release
+#      - attest-provenance-github
+#      - attest-provenance-melange
 
     runs-on: ubuntu-24.04
 
@@ -134,21 +135,7 @@ jobs:
           permission-contents: write
 
       - name: Publish release
-        env:
-          RELEASE_ID: ${{ needs.release.outputs.release-id }}
-          GITHUB_API_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: |
-          set -euo pipefail
-
-          API_HEADERS=(
-            --header "Accept: application/vnd.github+json"
-            --header "Authorization: Bearer ${GITHUB_API_TOKEN}"
-            --header "X-GitHub-Api-Version: 2026-03-10"
-          )
-
-          curl --silent --show-error --fail-with-body \
-            --request PATCH \
-            "${API_HEADERS[@]}" \
-            --header "Content-Type: application/json" \
-            --data '{"draft": false}' \
-            "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" >/dev/null
+        uses: rbrownwsws/publish-release@913e33f1f83f36f7a105d838945f130f860ab24d # master
+        with:
+          release-id: ${{ needs.create-release.outputs.release-id }}
+          github-api-token: ${{ steps.app-token.outputs.token }}
