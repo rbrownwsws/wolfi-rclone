@@ -143,12 +143,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
+      - name: Cache - Restore build deps
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.MELANGE_CACHE_DIR }}
+          key: ${{ needs.prepare.outputs.package-fullname }}
+          restore-keys: |
+            ${{ needs.prepare.outputs.package-name }}-${{ needs.prepare.outputs.package-version }}-
+            ${{ needs.prepare.outputs.package-name }}-
+
       - name: Build package
-        uses: rbrownwsws/build-melange-package@dd8d27d563e275350ad382f1f90eaa9e948f5d02
+        uses: rbrownwsws/build-melange-package@2d2adeca09cd8e0d2527cf60891b2fb5c178ec0a # master
         with:
           build-arch: ${{ matrix.builds.arch }}
           signing-key: ${{ secrets.signing-key }}
           signing-key-name: ${{ inputs.signing-key-name }}
+          cache-dir: ${{ env.MELANGE_CACHE_DIR }}
+
+      - name: Cache - Save build deps
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.MELANGE_CACHE_DIR }}
+          key: ${{ needs.prepare.outputs.package-fullname }}
 
       - name: Upload build output
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.2
