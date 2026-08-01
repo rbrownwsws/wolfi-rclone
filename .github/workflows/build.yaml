@@ -49,8 +49,8 @@ jobs:
     runs-on: ubuntu-24.04
 
     outputs:
-      arches: ${{ steps.prepare.outputs.arches }}
-      builds: ${{ steps.prepare.outputs.builds }}
+      arches: ${{ steps.build-arches.outputs.arches }}
+      builds: ${{ steps.build-arches.outputs.builds }}
 
       package-name: ${{ steps.pkg-info.outputs.package-name }}
       package-version: ${{ steps.pkg-info.outputs.package-version }}
@@ -60,8 +60,8 @@ jobs:
       package-distro: ${{ steps.pkg-info.outputs.package-distro }}
 
     steps:
-      - name: Prepare build parameters
-        id: prepare
+      - name: Prepare build arch parameters
+        id: build-arches
         shell: bash
         env:
           BUILD_ARCH: ${{ inputs.build-arch }}
@@ -103,8 +103,8 @@ jobs:
         id: pkg-info
         uses: rbrownwsws/get-melange-package-info@3bbdcad7aafc515f2aef9e26340dbeafd0fbf84b
 
-      - name: Export public signing key
-        id: export-public-key
+      - name: Prepare for signing
+        id: signing
         shell: bash
         env:
           SIGNING_KEY: "${{ secrets.signing-key }}"
@@ -112,18 +112,39 @@ jobs:
         run: |
           set -euo pipefail
 
-          TEMP_DIR=$(mktemp -d --tmpdir="${RUNNER_TEMP}")
-          PUB_KEY_FILE="${TEMP_DIR}/${SIGNING_KEY_NAME}.rsa.pub"
+          if [[ -n "${SIGNING_KEY:-}" && -z "${SIGNING_KEY_NAME:-}" ]]; then
+            echo "::error::You provided 'secret.signing-key' but did not provide 'input.signing-key-name'" >&2
+            exit 1
+          fi
 
-          openssl rsa -pubout -outform PEM -out "${PUB_KEY_FILE}" <<<"${SIGNING_KEY}"
+          if [[ -n "${SIGNING_KEY_NAME:-}" && -z "${SIGNING_KEY:-}" ]]; then
+            echo "::error::You provided 'input.signing-key-name' but did not provide 'secret.signing-key'" >&2
+            exit 1
+          fi
 
-          echo "public-key-file=${PUB_KEY_FILE}" >> "${GITHUB_OUTPUT}"
+          if [[ -n "${SIGNING_KEY:-}" ]]; then
+            USE_SIGNING="true"
+            echo "::info::This build will be signed
+
+            TEMP_DIR=$(mktemp -d --tmpdir="${RUNNER_TEMP}")
+            PUB_KEY_FILE="${TEMP_DIR}/${SIGNING_KEY_NAME}.rsa.pub"
+
+            openssl rsa -pubout -outform PEM -out "${PUB_KEY_FILE}" <<<"${SIGNING_KEY}"
+
+            echo "public-key-file=${PUB_KEY_FILE}" >> "${GITHUB_OUTPUT}"
+          else
+            USE_SIGNING="false"
+            echo "::info::This build will not be signed
+          fi
+
+          echo "use-signing=${USE_SIGNING}" >> "${GITHUB_OUTPUT}"
 
       - name: Upload public signing key
+        if: ${{ steps.signing.outputs.use-signing == 'true' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.2
         with:
           name: build-public-key
-          path: "${{ steps.export-public-key.outputs.public-key-file }}"
+          path: "${{ steps.signing.outputs.public-key-file }}"
           retention-days: 1
 
   build:
