@@ -122,6 +122,7 @@ jobs:
             exit 1
           fi
 
+          USE_SIGNING="false"
           if [[ -n "${SIGNING_KEY:-}" ]]; then
             USE_SIGNING="true"
             echo "::info::This build will be signed
@@ -133,7 +134,6 @@ jobs:
 
             echo "public-key-file=${PUB_KEY_FILE}" >> "${GITHUB_OUTPUT}"
           else
-            USE_SIGNING="false"
             echo "::info::This build will not be signed
           fi
 
