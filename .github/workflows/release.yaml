@@ -53,6 +53,7 @@ jobs:
           content-type: 'application/x-pem-file'
           file-path: ${{ github.workspace }}/keys/${{ vars.APK_SIGNING_KEY_NAME }}.rsa.pub
           upload-url: ${{ steps.create-release.outputs.upload-url }}
+          github-api-token: ${{ steps.app-token.outputs.token }}
 
 #  attest-provenance-github:
 #    needs:
