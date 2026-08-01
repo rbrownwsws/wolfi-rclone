@@ -103,6 +103,29 @@ jobs:
         id: pkg-info
         uses: rbrownwsws/get-melange-package-info@3bbdcad7aafc515f2aef9e26340dbeafd0fbf84b
 
+      - name: Export public signing key
+        id: export-public-key
+        shell: bash
+        env:
+          SIGNING_KEY: "${{ secrets.signing-key }}"
+          SIGNING_KEY_NAME: "${{ inputs.signing-key-name }}"
+        run: |
+          set -euo pipefail
+
+          TEMP_DIR=$(mktemp -d --tmpdir="${RUNNER_TEMP}")
+          PUB_KEY_FILE="${TEMP_DIR}/${SIGNING_KEY_NAME}.rsa.pub"
+
+          openssl -pubout -o "${PUB_KEY_FILE}" <<<"${SIGNING_KEY}"
+
+          echo "public-key-file=${PUB_KEY_FILE}" >> "${GITHUB_OUTPUT}"
+
+      - name: Upload public signing key
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.2
+        with:
+          name: build-public-key
+          path: "${{ steps.export-public-key.outputs.public-key-file }}"
+          retention-days: 1
+
   build:
     needs:
       - prepare
