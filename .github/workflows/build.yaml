@@ -115,7 +115,7 @@ jobs:
           TEMP_DIR=$(mktemp -d --tmpdir="${RUNNER_TEMP}")
           PUB_KEY_FILE="${TEMP_DIR}/${SIGNING_KEY_NAME}.rsa.pub"
 
-          openssl -pubout -o "${PUB_KEY_FILE}" <<<"${SIGNING_KEY}"
+          openssl rsa -pubout -o "${PUB_KEY_FILE}" <<<"${SIGNING_KEY}"
 
           echo "public-key-file=${PUB_KEY_FILE}" >> "${GITHUB_OUTPUT}"
 
