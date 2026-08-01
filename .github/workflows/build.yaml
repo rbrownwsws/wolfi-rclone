@@ -22,6 +22,27 @@ on:
       arches:
         description: "The architectures that were built (JSON array)"
         value: ${{ jobs.prepare.outputs.arches }}
+      package-name:
+        description: "Package name ('pkg' for 'pkg-1.2.3-r4.apk')"
+        value: ${{ jobs.prepare.outputs.package-name }}
+      package-version:
+        description: "Package version ('1.2.3' for 'pkg-1.2.3-r4.apk')"
+        value: ${{ jobs.prepare.outputs.package-version }}
+      package-epoch:
+        description: "Package epoch ('4' for 'pkg-1.2.3-r4.apk')"
+        value: ${{ jobs.prepare.outputs.package-epoch }}
+      package-fullname:
+        description: "Package fullname ('pkg-1.2.3-r4' for 'pkg-1.2.3-r4.apk')"
+        value: ${{ jobs.prepare.outputs.package-fullname }}
+      package-fullversion:
+        description: "Package fullversion ('1.2.3-r4' for 'pkg-1.2.3-r4.apk')"
+        value: ${{ jobs.prepare.outputs.package-fullversion }}
+      package-distro:
+        description: "Package distro ('wolfi', 'alpine', etc.)"
+        value: ${{ jobs.prepare.outputs.package-distro }}
+
+env:
+  MELANGE_CACHE_DIR: "./.cache/"
 
 jobs:
   prepare:
@@ -31,8 +52,16 @@ jobs:
       arches: ${{ steps.prepare.outputs.arches }}
       builds: ${{ steps.prepare.outputs.builds }}
 
+      package-name: ${{ steps.pkg-info.outputs.package-name }}
+      package-version: ${{ steps.pkg-info.outputs.package-version }}
+      package-epoch: ${{ steps.pkg-info.outputs.package-epoch }}
+      package-fullname: ${{ steps.pkg-info.outputs.package-fullname }}
+      package-fullversion: ${{ steps.pkg-info.outputs.package-fullversion }}
+      package-distro: ${{ steps.pkg-info.outputs.package-distro }}
+
     steps:
-      - id: prepare
+      - name: Prepare build parameters
+        id: prepare
         shell: bash
         env:
           BUILD_ARCH: ${{ inputs.build-arch }}
@@ -66,6 +95,13 @@ jobs:
 
           echo "arches=${arches_json}" >> "${GITHUB_OUTPUT}"
           echo "builds=${builds_json}" >> "${GITHUB_OUTPUT}"
+
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Get package info
+        id: pkg-info
+        uses: rbrownwsws/get-melange-package-info@3bbdcad7aafc515f2aef9e26340dbeafd0fbf84b
 
   build:
     needs:
