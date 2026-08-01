@@ -48,9 +48,10 @@ jobs:
           path: ${{ github.workspace }}/keys/
 
       - name: Add signing public key to release
-        uses: rbrownwsws/upload-release-asset@cbea2a60c78a3b334c54d47045691251821c170e # master
+        uses: rbrownwsws/upload-release-asset@15bb611e9934832ac64615781fa11111de65d7d3 # master
         with:
           asset-name: "${{ vars.APK_SIGNING_KEY_NAME }}.rsa.pub"
+          content-type: 'application/x-pem-file'
           file-path: ${{ github.workspace }}/keys/${{ vars.APK_SIGNING_KEY_NAME }}.rsa.pub
           upload-url: ${{ steps.create-release.outputs.upload-url }}
 
