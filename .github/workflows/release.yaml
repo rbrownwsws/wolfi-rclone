@@ -50,7 +50,6 @@ jobs:
       - name: Add signing public key to release
         uses: rbrownwsws/upload-release-asset@15bb611e9934832ac64615781fa11111de65d7d3 # master
         with:
-          asset-name: "${{ vars.APK_SIGNING_KEY_NAME }}.rsa.pub"
           content-type: 'application/x-pem-file'
           file-path: ${{ github.workspace }}/keys/${{ vars.APK_SIGNING_KEY_NAME }}.rsa.pub
           upload-url: ${{ steps.create-release.outputs.upload-url }}
@@ -115,28 +114,28 @@ jobs:
 #        with:
 #          attestation-file: "${{ github.workspace }}/attest/${{ matrix.file }}"
 
-  publish-release:
-    needs:
-      - create-release
+#  publish-release:
+#    needs:
+#      - create-release
 #      - attest-provenance-github
 #      - attest-provenance-melange
-
-    runs-on: ubuntu-24.04
-
-    permissions:
-      contents: write
-
-    steps:
-      - name: Create GitHub App Token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
-        id: app-token
-        with:
-          client-id: ${{ vars.RELEASER_APP_CLIENT_ID }}
-          private-key: ${{ secrets.RELEASER_APP_PRIVATE_KEY }}
-          permission-contents: write
-
-      - name: Publish release
-        uses: rbrownwsws/publish-release@913e33f1f83f36f7a105d838945f130f860ab24d # master
-        with:
-          release-id: ${{ needs.create-release.outputs.release-id }}
-          github-api-token: ${{ steps.app-token.outputs.token }}
+#
+#    runs-on: ubuntu-24.04
+#
+#    permissions:
+#      contents: write
+#
+#    steps:
+#      - name: Create GitHub App Token
+#        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+#        id: app-token
+#        with:
+#          client-id: ${{ vars.RELEASER_APP_CLIENT_ID }}
+#          private-key: ${{ secrets.RELEASER_APP_PRIVATE_KEY }}
+#          permission-contents: write
+#
+#      - name: Publish release
+#        uses: rbrownwsws/publish-release@913e33f1f83f36f7a105d838945f130f860ab24d # master
+#        with:
+#          release-id: ${{ needs.create-release.outputs.release-id }}
+#          github-api-token: ${{ steps.app-token.outputs.token }}
