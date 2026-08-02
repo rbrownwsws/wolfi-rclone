@@ -130,7 +130,7 @@ jobs:
         with:
           content-type: 'application/gzip'
           file-path: ${{ steps.prepare-dist.outputs.dist-dir }}/${{ env.RELEASE_PACKAGE_FILENAME }}.apk
-          upload-url: ${{ steps.create-release.outputs.upload-url }}
+          upload-url: ${{ needs.create-release.outputs.upload-url }}
           github-api-token: ${{ steps.app-token.outputs.token }}
 
 #  attest-provenance-github:
