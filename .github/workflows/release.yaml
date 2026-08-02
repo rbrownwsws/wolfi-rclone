@@ -105,7 +105,7 @@ jobs:
           retention-days: 1
 
       - name: Generate GitHub Actions Workflow build provenance
-        uses: rbrownwsws/generate-github-workflow-provenance@5e6b34f542a8a402a173a1d1db7a9650750ad53a # master
+        uses: rbrownwsws/generate-github-workflow-provenance@7e5c3fd1c5d759087cc122135da668397705320e # master
         with:
           subject-file: ${{ steps.prepare-dist.outputs.dist-dir }}/${{ env.RELEASE_PACKAGE_FILENAME }}.apk
           output-file: ${{ steps.prepare-dist.outputs.dist-dir }}/${{ env.RELEASE_PACKAGE_FILENAME }}.github.provenance.json
