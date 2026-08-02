@@ -125,7 +125,7 @@ jobs:
           USE_SIGNING="false"
           if [[ -n "${SIGNING_KEY:-}" ]]; then
             USE_SIGNING="true"
-            echo "::notice::This build will be signed"
+            echo "::notice::This build will be signed with \"${SIGNING_KEY_NAME}\""
 
             TEMP_DIR=$(mktemp -d --tmpdir="${RUNNER_TEMP}")
             PUB_KEY_FILE="${TEMP_DIR}/${SIGNING_KEY_NAME}.rsa.pub"
