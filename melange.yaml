@@ -1,7 +1,7 @@
 package:
   name: rclone
-  version: "1.74.4"
-  epoch: 1
+  version: "1.75.0"
+  epoch: 0
   description: Rclone syncs your files to cloud storage
   copyright:
     - license: MIT
@@ -11,7 +11,7 @@ package:
 pipeline:
   - uses: git-checkout
     with:
-      expected-commit: 5bc93a2a7ab0ebd0a11352bc4968eabeffb18027
+      expected-commit: 9ee9d0a0cafd5e5fe3b271d2280b090ab6e64048
       repository: https://github.com/rclone/rclone
       tag: v${{package.version}}
 
