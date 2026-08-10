@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Setup melange
-        uses: chainguard-dev/actions/setup-melange@9d631658f55713e5f63ca0cc21ee168f81301fd9 # v1.6.30
+        uses: chainguard-dev/actions/setup-melange@bed8050123fff65538e2db1902ff9404030c0221 # v1.6.31
 
       - name: Create package repo
         uses: rbrownwsws/create-melange-package-repo@589957f140564d80521515e25133b294c237f004
