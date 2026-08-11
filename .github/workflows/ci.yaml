@@ -10,6 +10,6 @@ on:
 
 jobs:
   build:
-    uses: rbrownwsws/melange-workflows/.github/workflows/build.yaml@69c40e01711fb31ea14b0f29ab1e35a24926611a # master
+    uses: rbrownwsws/melange-workflows/.github/workflows/build.yaml@9934244b3a67901c1d4d0bf674a7c0a5ce353a9f # master
     with:
       build-arch: "amd64,arm64"
