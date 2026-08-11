@@ -1,0 +1,23 @@
+# $schema: https://json.schemastore.org/github-workflow.json
+name: Update Package Repo
+
+on:
+  workflow_dispatch:
+  release:
+    types:
+      - released
+
+permissions: {}
+
+jobs:
+  update-package-repo:
+    permissions:
+      contents: read   # to get packages from Releases
+      pages: write     # to deploy to Pages
+      id-token: write  # to verify the deployment originates from an appropriate source
+
+    uses: rbrownwsws/melange-workflows/.github/workflows/update-package-repo.yaml@9934244b3a67901c1d4d0bf674a7c0a5ce353a9f # master
+    with:
+      signing-key-name: ${{ vars.APK_SIGNING_KEY_NAME }}
+    secrets:
+      signing-key: ${{ secrets.APK_SIGNING_KEY }}
