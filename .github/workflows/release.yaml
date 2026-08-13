@@ -4,6 +4,8 @@ name: Release
 on:
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   release:
     uses: rbrownwsws/melange-workflows/.github/workflows/release.yaml@dc49ddcbbcf634a1417d72229c651677d278d07d # master
@@ -16,6 +18,7 @@ jobs:
       signing-key: ${{ secrets.APK_SIGNING_KEY }}
       releaser-app-private-key: ${{ secrets.RELEASER_APP_PRIVATE_KEY }}
     permissions:
-      id-token: write
-      attestations: write
-      artifact-metadata: write
+      contents: read            # to check out source to build
+      id-token: write           # to get ID needed to sign attestation
+      attestations: write       # to store attestation
+      artifact-metadata: write  # to store attestation
