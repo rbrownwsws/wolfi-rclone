@@ -1,0 +1,22 @@
+# $schema: https://json.schemastore.org/github-workflow.json
+name: Update Package
+
+on:
+  workflow_dispatch:
+  schedule:
+    - timezone: "Europe/London"
+      cron: '0 0 * * *'
+
+permissions: {}
+
+jobs:
+  update:
+    permissions:
+      contents: read   # to get source to build
+
+    uses: rbrownwsws/melange-workflows/.github/workflows/update-package.yaml@5ea10d05285d312b8d540c7d7a3aaa3cc0502bd7
+    with:
+      build-arch: 'amd64,arm64'
+      updater-app-client-id: ${{ vars.UPDATER_APP_CLIENT_ID }}
+    secrets:
+      updater-app-private-key: ${{ secrets.UPDATER_APP_PRIVATE_KEY }}

@@ -3,16 +3,19 @@ name: Release
 
 on:
   workflow_dispatch:
+  push:
+    tags:
+      - "*-r[0-9]+"
 
 permissions: {}
 
 jobs:
   release:
-    uses: rbrownwsws/melange-workflows/.github/workflows/release.yaml@1e3926e12fe67275f9303fc16b7a25a2a1117d82 # master
+    uses: rbrownwsws/melange-workflows/.github/workflows/release.yaml@5ea10d05285d312b8d540c7d7a3aaa3cc0502bd7 # master
     with:
       build-arch: "amd64,arm64"
       signing-key-name: ${{ vars.APK_SIGNING_KEY_NAME }}
-      publish-release: false
+      publish-release: true
       releaser-app-client-id: ${{ vars.RELEASER_APP_CLIENT_ID }}
     secrets:
       signing-key: ${{ secrets.APK_SIGNING_KEY }}
