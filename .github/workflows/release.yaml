@@ -11,7 +11,7 @@ permissions: {}
 
 jobs:
   release:
-    uses: rbrownwsws/melange-workflows/.github/workflows/release.yaml@5834f8f85f7e8afd64386124bb879ee374bfef0d # master
+    uses: rbrownwsws/melange-workflows/.github/workflows/release.yaml@83aa3affe06f17d2fdd65b65c9ca1d2f33c0b8c0 # v1.0.0
     with:
       build-arch: "amd64,arm64"
       signing-key-name: ${{ vars.APK_SIGNING_KEY_NAME }}
