@@ -17,7 +17,6 @@ pipeline:
 
   - uses: go/build
     with:
-      go-package: go-1.26
       ldflags: -X github.com/rclone/rclone/fs.Version=${{package.version}}
       packages: .
       output: rclone
@@ -28,5 +27,3 @@ environment:
       - https://packages.wolfi.dev/os
     keyring:
       - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
-    packages:
-      - go-1.26
