@@ -16,7 +16,7 @@ jobs:
       pages: write     # to deploy to Pages
       id-token: write  # to verify the deployment originates from an appropriate source
 
-    uses: rbrownwsws/melange-workflows/.github/workflows/update-package-repo.yaml@f2d8c2ebfb2f52a77949553045d7eef622000822 # v1.0.3
+    uses: rbrownwsws/melange-workflows/.github/workflows/update-package-repo.yaml@e070ac2fa932a17815338bbb412e999a8979adcd # v1.0.4
     with:
       signing-key-name: ${{ vars.APK_SIGNING_KEY_NAME }}
     secrets:

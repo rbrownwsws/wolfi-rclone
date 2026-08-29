@@ -14,7 +14,7 @@ jobs:
     permissions:
       contents: read   # to get source to build
 
-    uses: rbrownwsws/melange-workflows/.github/workflows/update-package.yaml@f2d8c2ebfb2f52a77949553045d7eef622000822 # v1.0.3
+    uses: rbrownwsws/melange-workflows/.github/workflows/update-package.yaml@e070ac2fa932a17815338bbb412e999a8979adcd # v1.0.4
     with:
       build-arch: 'amd64,arm64'
       updater-app-client-id: ${{ vars.UPDATER_APP_CLIENT_ID }}
